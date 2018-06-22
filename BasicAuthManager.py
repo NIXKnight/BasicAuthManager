@@ -1,11 +1,15 @@
 import os
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, redirect
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, validators
 from passlib.apache import HtpasswdFile
 from passlib.hash import bcrypt
 
 app = Flask(__name__)
+
+def get_users(htPasswdFile):
+  htContent = HtpasswdFile(htPasswdFile)
+  return htContent.users()
 
 class change_password_form(FlaskForm):
   password = PasswordField('', [validators.DataRequired()])
@@ -17,8 +21,25 @@ def change_password():
   if form.validate_on_submit():
     password = form.password.data
     form.password.data = ''
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('change_password'))
   return render_template("change_password.html.j2", form=form)
+
+@app.route('/admin/add', methods=['GET', 'POST'])
+def add_user():
+  return render_template("adduser.html.j2")
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+  users = get_users(app.config['HTPASSWD_FILE'])
+  return render_template("admin.html.j2", users=users)
+
+@app.route('/admin/edit', methods=['GET', 'POST'])
+def edit_user():
+  return render_template("edituser.html.j2")
+
+@app.route('/admin/remove', methods=['GET', 'POST'])
+def remove_user():
+  return redirect(url_for('admin'))
 
 if __name__ == '__main__':
   if os.path.exists('config.cfg'):
