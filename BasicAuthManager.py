@@ -53,6 +53,11 @@ def create_user(username, password):
   htContent.set_password(username, password)
   htContent.save()
 
+def rm_user(username):
+  htcontent = HtpasswdFile(app.config['HTPASSWD_FILE'])
+  htcontent.delete(username)
+  htcontent.save()
+
 class change_password_form(FlaskForm):
   password = PasswordField('', [validators.DataRequired()])
   confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
@@ -103,7 +108,7 @@ def add_user():
     return redirect(url_for('admin'))
   return render_template("adduser.html.j2", form=form, username=username, email=email, password=password)
 
-@app.route('/admin', methods=['GET', 'POST'])
+@app.route('/admin', methods=['GET'])
 @auth_required
 def admin():
   verify_admin(request.authorization['username'])
@@ -126,9 +131,10 @@ def edit_user(username):
     return redirect(url_for('admin'))
   return render_template("edituser.html.j2", form=form, username=username, email=email, password=password)
 
-@app.route('/admin/remove', methods=['GET', 'POST'])
+@app.route('/admin/remove/<username>', methods=['GET', 'POST'])
 @auth_required
-def remove_user():
+def remove_user(username):
+  rm_user(username)
   return redirect(url_for('admin'))
 
 @app.errorhandler(401)
