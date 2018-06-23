@@ -33,6 +33,8 @@ def verify_passwd_hash(username, password):
       return True
   except ValueError:
     return False
+  except TypeError:
+    return False
 
 def verify_admin(username):
   if str(username) != str(app.config['ADMIN_USER']):
