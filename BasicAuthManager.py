@@ -1,5 +1,8 @@
 import os
-from flask import Flask, render_template, url_for, redirect
+import logging
+from functools import wraps
+from flask.logging import default_handler
+from flask import Flask, render_template, url_for, redirect, request, Response, abort
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, validators
 from wtforms.fields.html5 import EmailField
@@ -7,6 +10,41 @@ from passlib.apache import HtpasswdFile
 from passlib.hash import bcrypt
 
 app = Flask(__name__)
+
+def auth_required(f):
+  @wraps(f)
+  def authen(*args, **kwargs):
+    auth = request.authorization
+    if not auth or not check_user_auth(auth.username, auth.password):
+      return authenticate()
+    return f(*args, **kwargs)
+  return authen
+
+def check_user_auth(username, password):
+  if verify_passwd_hash(username, password):
+    return True
+  else:
+    return not_authenticated()
+
+def verify_passwd_hash(username, password):
+  htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], default_scheme='bcrypt')
+  passwdHash = htContent.get_hash(username)
+  try:
+    hashMatch = bcrypt.verify(password, passwdHash)
+    if hashMatch:
+      return True
+  except ValueError:
+    return False
+
+def verify_admin(username):
+  if str(username) != str(app.config['ADMIN_USER']):
+    return not_authenticated()
+
+def authenticate():
+  return Response('Could not verify your access level for that URL.\nYou have to login with proper credentials', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def not_authenticated():
+  abort(401)
 
 def get_users(htPasswdFile):
   htContent = HtpasswdFile(htPasswdFile)
@@ -27,7 +65,16 @@ class new_user_form(FlaskForm):
   password = PasswordField('', [validators.DataRequired()])
   confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
 
+@app.route('/', methods=['GET'])
+@auth_required
+def root_uri():
+  if str(request.authorization['username']) == str(app.config['ADMIN_USER']):
+    return redirect(url_for('admin'))
+  else:
+    return redirect(url_for('change_password'))
+
 @app.route('/change-password', methods=['GET', 'POST'])
+@auth_required
 def change_password():
   form = change_password_form()
   if form.validate_on_submit():
@@ -54,17 +101,25 @@ def add_user():
   return render_template("adduser.html.j2", form=form, username=username, email=email, password=password)
 
 @app.route('/admin', methods=['GET', 'POST'])
+@auth_required
 def admin():
+  verify_admin(request.authorization['username'])
   users = get_users(app.config['HTPASSWD_FILE'])
   return render_template("admin.html.j2", users=users)
 
 @app.route('/admin/edit', methods=['GET', 'POST'])
+@auth_required
 def edit_user():
   return render_template("edituser.html.j2")
 
 @app.route('/admin/remove', methods=['GET', 'POST'])
+@auth_required
 def remove_user():
   return redirect(url_for('admin'))
+
+@app.errorhandler(401)
+def custom_401(error):
+    return Response('<Why access is denied string goes here...>', 401, {'WWWAuthenticate':'Basic realm="Login Required"'})
 
 if __name__ == '__main__':
   if os.path.exists('config.cfg'):
