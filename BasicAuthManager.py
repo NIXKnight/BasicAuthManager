@@ -1,7 +1,8 @@
 import os
 from flask import Flask, render_template, url_for, redirect
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, validators
+from wtforms import StringField, PasswordField, validators
+from wtforms.fields.html5 import EmailField
 from passlib.apache import HtpasswdFile
 from passlib.hash import bcrypt
 
@@ -11,7 +12,18 @@ def get_users(htPasswdFile):
   htContent = HtpasswdFile(htPasswdFile)
   return htContent.users()
 
+def create_user(username, password):
+  htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], default_scheme='bcrypt')
+  htContent.set_password(username, password)
+  htContent.save()
+
 class change_password_form(FlaskForm):
+  password = PasswordField('', [validators.DataRequired()])
+  confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
+
+class new_user_form(FlaskForm):
+  username = StringField('', [validators.DataRequired()])
+  email = EmailField('', [validators.DataRequired(), validators.Email()])
   password = PasswordField('', [validators.DataRequired()])
   confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
 
@@ -26,7 +38,20 @@ def change_password():
 
 @app.route('/admin/add', methods=['GET', 'POST'])
 def add_user():
-  return render_template("adduser.html.j2")
+  username = None
+  email = None
+  password = None
+  form = new_user_form()
+  if form.validate_on_submit():
+    username = form.username.data
+    email = form.email.data
+    password = form.password.data
+    form.username.data = ''
+    form.email.data = ''
+    form.password.data = ''
+    create_user(username, password)
+    return redirect(url_for('admin'))
+  return render_template("adduser.html.j2", form=form, username=username, email=email, password=password)
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():

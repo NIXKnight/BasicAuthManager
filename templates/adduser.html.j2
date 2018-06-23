@@ -1,0 +1,27 @@
+{% extends "base.html.j2" %}
+{% from "render_field.html.j2" import render_field %}
+{% block content %}
+<div class="py-5">
+  <div class="container">
+    <div class="row w-100">
+      <div class="col-md-4 offset-md-4">
+        <div class="card">
+          <div class="card-header">
+            <b>Add User</b>
+          </div>
+          <div class="card-body">
+            <form method="POST" role="form" class="form-horizontal">
+                {{ form.csrf_token }}
+                {{ render_field(form.username, placeholder="Username") }}
+                {{ render_field(form.email, placeholder="Email") }}
+                {{ render_field(form.password, placeholder="Password") }}
+                {{ render_field(form.confimPassword, placeholder="Confirm Password") }}
+                <button type="submit" class="btn btn-primary">Add</button>
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
