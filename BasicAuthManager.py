@@ -65,6 +65,11 @@ class new_user_form(FlaskForm):
   password = PasswordField('', [validators.DataRequired()])
   confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
 
+class edit_user_form(FlaskForm):
+  email = EmailField('', [validators.DataRequired(), validators.Email()])
+  password = PasswordField('', [validators.DataRequired()])
+  confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
+
 @app.route('/', methods=['GET'])
 @auth_required
 def root_uri():
@@ -107,10 +112,21 @@ def admin():
   users = get_users(app.config['HTPASSWD_FILE'])
   return render_template("admin.html.j2", users=users)
 
-@app.route('/admin/edit', methods=['GET', 'POST'])
+@app.route('/admin/edit/<username>', methods=['GET', 'POST'])
 @auth_required
-def edit_user():
-  return render_template("edituser.html.j2")
+def edit_user(username):
+  email = None
+  password = None
+  form = edit_user_form()
+  if form.validate_on_submit():
+    email = form.email.data
+    password = form.password.data
+    form.email.data = ''
+    form.password.data = ''
+    form.confimPassword.data = ''
+    create_user(username, password)
+    return redirect(url_for('admin'))
+  return render_template("edituser.html.j2", form=form, username=username, email=email, password=password)
 
 @app.route('/admin/remove', methods=['GET', 'POST'])
 @auth_required
