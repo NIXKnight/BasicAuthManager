@@ -1,7 +1,5 @@
 import os
-import logging
 from functools import wraps
-from flask.logging import default_handler
 from flask import Flask, render_template, url_for, redirect, request, Response, abort
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, validators
