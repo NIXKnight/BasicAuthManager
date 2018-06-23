@@ -2,8 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <title>BasicAuthManager | {{ pagename }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="fa-solid.min.css" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawsome.css') }}" type="text/css">
     <link rel="stylesheet" href="{{ url_for('static', filename='bootsrtap.min.css') }}" type="text/css">
   </head>
   <body>
@@ -12,7 +13,7 @@
         <div class="collapse navbar-collapse">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link" href="#"><b>BasicAuthManager</b></a>
+              <a class="nav-link" href="{{ url_for('root_uri') }}"><b><i class="fa fa-key fa-rotate-270"></i> BasicAuthManager</b></a>
             </li>
           </ul>
         </div>

@@ -39,7 +39,8 @@ def verify_admin(username):
     return not_authenticated()
 
 def authenticate():
-  return Response('Could not verify your access level for that URL.\nYou have to login with proper credentials', 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
+  pagename = "Need Proper Authentication"
+  return Response(render_template("401.html.j2", pagename=pagename), 401, {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 def not_authenticated():
   abort(401)
@@ -84,15 +85,17 @@ def root_uri():
 @app.route('/change-password', methods=['GET', 'POST'])
 @auth_required
 def change_password():
+  pagename = "Change Password"
   form = change_password_form()
   if form.validate_on_submit():
     password = form.password.data
     form.password.data = ''
     return redirect(url_for('change_password'))
-  return render_template("change_password.html.j2", form=form)
+  return render_template("change_password.html.j2", form=form, pagename=pagename)
 
 @app.route('/admin/add', methods=['GET', 'POST'])
 def add_user():
+  pagename = "Add User"
   username = None
   email = None
   password = None
@@ -106,18 +109,20 @@ def add_user():
     form.password.data = ''
     create_user(username, password)
     return redirect(url_for('admin'))
-  return render_template("adduser.html.j2", form=form, username=username, email=email, password=password)
+  return render_template("adduser.html.j2", form=form, username=username, email=email, password=password, pagename=pagename)
 
 @app.route('/admin', methods=['GET'])
 @auth_required
 def admin():
+  pagename = "Admin"
   verify_admin(request.authorization['username'])
   users = get_users(app.config['HTPASSWD_FILE'])
-  return render_template("admin.html.j2", users=users)
+  return render_template("admin.html.j2", users=users, pagename=pagename)
 
 @app.route('/admin/edit/<username>', methods=['GET', 'POST'])
 @auth_required
 def edit_user(username):
+  pagename = "Edit User"
   email = None
   password = None
   form = edit_user_form()
@@ -129,7 +134,7 @@ def edit_user(username):
     form.confimPassword.data = ''
     create_user(username, password)
     return redirect(url_for('admin'))
-  return render_template("edituser.html.j2", form=form, username=username, email=email, password=password)
+  return render_template("edituser.html.j2", form=form, username=username, email=email, password=password, pagename=pagename)
 
 @app.route('/admin/remove/<username>', methods=['GET', 'POST'])
 @auth_required
@@ -139,7 +144,8 @@ def remove_user(username):
 
 @app.errorhandler(401)
 def custom_401(error):
-    return Response('<Why access is denied string goes here...>', 401, {'WWWAuthenticate':'Basic realm="Login Required"'})
+    pagename = "Need Proper Authentication"
+    return Response(render_template("401.html.j2", pagename=pagename), 401, {'WWWAuthenticate':'Basic realm="Login Required"'})
 
 if __name__ == '__main__':
   if os.path.exists('config.cfg'):
