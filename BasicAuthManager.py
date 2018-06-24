@@ -6,6 +6,9 @@ from wtforms import StringField, PasswordField, validators
 from wtforms.fields.html5 import EmailField
 from passlib.apache import HtpasswdFile
 from passlib.hash import bcrypt
+import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
 
 app = Flask(__name__)
 
@@ -61,6 +64,24 @@ def rm_user(username):
   htcontent.delete(username)
   htcontent.save()
 
+def send_mail(username, password, email):
+  msg = MIMEMultipart()
+  msg['From'] = app.config['SMTP_FROM']
+  msg['To'] = email
+  msg['Subject'] = "Access for " + username
+  body = "Password for your username " + username + " is set to " + password
+  msg.attach(MIMEText(body, 'plain'))
+  if app.config['SMTP_TRANSPORT'] == "STARTTLS":
+    smtp = smtplib.SMTP(app.config['SMTP_SERVER'], app.config['SMTP_PORT'])
+    smtp.ehlo()
+    smtp.starttls()
+  if app.config['SMTP_TRANSPORT'] == "SSL":
+    smtp = smtplib.SMTP_SSL(app.config['SMTP_SERVER'], app.config['SMTP_PORT'])
+  smtp.login(app.config['SMTP_USERNAME'], app.config['SMTP_PASSWORD'])
+  text = msg.as_string()
+  smtp.sendmail(app.config['SMTP_FROM'], email, text)
+  smtp.quit()
+
 class change_password_form(FlaskForm):
   password = PasswordField('', [validators.DataRequired()])
   confimPassword = PasswordField('', [validators.DataRequired(), validators.EqualTo('password', message='Passwords must match')])
@@ -110,6 +131,7 @@ def add_user():
     form.email.data = ''
     form.password.data = ''
     create_user(username, password)
+    send_mail(username, password, email)
     return redirect(url_for('admin'))
   return render_template("adduser.html.j2", form=form, username=username, email=email, password=password, pagename=pagename)
 
@@ -135,6 +157,7 @@ def edit_user(username):
     form.password.data = ''
     form.confimPassword.data = ''
     create_user(username, password)
+    send_mail(username, password, email)
     return redirect(url_for('admin'))
   return render_template("edituser.html.j2", form=form, username=username, email=email, password=password, pagename=pagename)
 
