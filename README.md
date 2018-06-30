@@ -9,7 +9,7 @@ BasicAuthManager requires Python 2.7.x.
 ## **Installing and Running**
 Install python, virtualenv, supervisor and apache2-utils packages:
 ```console
-# apt-get install python python-virtualenv supervisor
+# apt-get install python python-virtualenv supervisor apache2-utils
 ```
 Create a user:
 ```console
@@ -23,7 +23,7 @@ $ git clone https://github.com/NIXKnight/BasicAuthManager.git
 Create a python virtual environment and install application requirements:
 ```console
 $ virtualenv ~/venv
-$ pip install ~/BasicAuthManager/requirements.txt
+$ pip -r install ~/BasicAuthManager/requirements.txt
 ```
 Create a configuration file `~/BasicAuthManager/config.cfg` as follows:
 ```python
@@ -43,7 +43,7 @@ Create an Htpasswd file (with `-B` option for bcrypt encryption) having an admin
 ```console
 $ htpasswd -B -c /path/to/htpasswd_file admin
 ```
-Create a supervisor configuration file /etc/supervisor/conf.d/BasicAuthManager.conf with following parameters:
+Create a supervisor configuration file `/etc/supervisor/conf.d/BasicAuthManager.conf` with following parameters:
 ```ini
 user = bam
 directory = /home/bam/BasicAuthManager
@@ -55,7 +55,7 @@ stdout_logfile = /var/log/supervisor/BasicAuthManager_stdout.log
 stderr_logfile = /var/log/supervisor/BasicAuthManager_stderr.log
 ```
 Create NGINX server block as follows:
-```conf
+```text
 server {
   listen 80;
   server_name this.bam.local;
@@ -81,13 +81,13 @@ If you don't want to go through the hassle of manual setup, you can use the Ansi
 ## **Contributing**
 If you want to contribute to BasicAuthManager and make it better, your help is very welcome. Note that I am not a Python/Flask developer.
 
-You could send make a pull request. Just do let me know how does your pull request makes the application better. I will do my best to understand and merge the code.
+You could send me a pull request. Just do let me know how does your pull request makes the application better. I will do my best to understand and merge the code.
 
 ## **Why Did I Write This Code?**
-I wanted to learn bits of how to code a web application. In trying to do so, I wrote BasicAuthManager to fullfil my need. I hate logging in to the server to update htpasswd files everytime I have to create a user.
+I wanted to learn bits of how to code a web application. In trying to do so, I wrote BasicAuthManager to fullfil my need because I hate logging in to the server to update htpasswd files everytime I have to create/remove a user.
 
 ## **License**
-This Ansible role is licensed under MIT License.
+BasicAuthManager is licensed under MIT License. See LICENSE file.
 
 ## **Author**
 [Saad Ali](https://github.com/nixknight)
