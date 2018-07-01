@@ -131,6 +131,7 @@ def change_password():
 
 @app.route('/admin/add', methods=['GET', 'POST'])
 def add_user():
+  verify_admin(request.authorization['username'])
   pagename = "Add User"
   username = None
   email = None
@@ -159,6 +160,7 @@ def admin():
 @app.route('/admin/edit/<username>', methods=['GET', 'POST'])
 @auth_required
 def edit_user(username):
+  verify_admin(request.authorization['username'])
   pagename = "Edit User"
   email = None
   password = None
@@ -177,6 +179,7 @@ def edit_user(username):
 @app.route('/admin/remove/<username>', methods=['GET', 'POST'])
 @auth_required
 def remove_user(username):
+  verify_admin(request.authorization['username'])
   rm_user(username)
   return redirect(url_for('admin'))
 

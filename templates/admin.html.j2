@@ -27,7 +27,9 @@
                     <td>{{ user }}</td>
                     <td class="text-center">
                       <a class="btn-sm btn-dark" href="{{ url_for('edit_user', username=user) }}"><i class="fas fa-edit"></i> Edit</a>
+                      {% if user != request.authorization["username"] %}
                       <a class="btn-sm btn-danger" href="{{ url_for('remove_user', username=user) }}"><i class="fas fa-trash-alt"></i> Remove</a>
+                      {% endif %}
                     </td>
                   </tr>
                 {% endfor %}
