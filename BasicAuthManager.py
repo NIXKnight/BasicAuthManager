@@ -126,6 +126,7 @@ def change_password():
   if form.validate_on_submit():
     password = form.password.data
     form.password.data = ''
+    create_user(request.authorization['username'], password)
     return redirect(url_for('change_password'))
   return render_template("change_password.html.j2", form=form, pagename=pagename)
 
