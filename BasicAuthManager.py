@@ -122,13 +122,14 @@ def root_uri():
 @auth_required
 def change_password():
   pagename = "Change Password"
+  password = None
   form = change_password_form()
   if form.validate_on_submit():
     password = form.password.data
     form.password.data = ''
     create_user(request.authorization['username'], password)
     return redirect(url_for('change_password'))
-  return render_template("change_password.html.j2", form=form, pagename=pagename)
+  return render_template("change_password.html.j2", form=form, password=password, pagename=pagename)
 
 @app.route('/admin/add', methods=['GET', 'POST'])
 def add_user():
