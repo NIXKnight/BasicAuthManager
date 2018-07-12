@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, validators
 from wtforms.fields.html5 import EmailField
 from passlib.apache import HtpasswdFile
-from passlib.hash import bcrypt
+from passlib.hash import apr_md5_crypt
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
@@ -16,7 +16,7 @@ if os.path.exists('config.cfg'):
   app.config.from_pyfile('config.cfg')
   if not os.path.exists(app.config['HTPASSWD_FILE']):
     from getpass import getpass
-    htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], new=True, default_scheme='bcrypt')
+    htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], new=True, default_scheme='apr_md5_crypt')
     passwordPrompt = lambda: (getpass(prompt='Enter Password for ' + app.config['ADMIN_USER'] + ": "), getpass('Confirm password: '))
     adminPassword, adminPassword2 = passwordPrompt()
     while adminPassword != adminPassword2:
@@ -41,10 +41,10 @@ def check_user_auth(username, password):
     return not_authenticated()
 
 def verify_passwd_hash(username, password):
-  htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], default_scheme='bcrypt')
+  htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], default_scheme='apr_md5_crypt')
   passwdHash = htContent.get_hash(username)
   try:
-    hashMatch = bcrypt.verify(password, passwdHash)
+    hashMatch = apr_md5_crypt.verify(password, passwdHash)
     if hashMatch:
       return True
   except ValueError:
@@ -68,7 +68,7 @@ def get_users(htPasswdFile):
   return htContent.users()
 
 def create_user(username, password):
-  htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], default_scheme='bcrypt')
+  htContent = HtpasswdFile(app.config['HTPASSWD_FILE'], default_scheme='apr_md5_crypt')
   htContent.set_password(username, password)
   htContent.save()
 

@@ -1,4 +1,3 @@
-bcrypt==3.1.4
 cffi==1.11.5
 dominate==2.3.1
 Flask==1.0.2
