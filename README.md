@@ -1,7 +1,7 @@
 # **BasicAuthManager**
 BasicAuthManager is a small web GUI written in Flask for managing HTTP basic authentication. It uses [`passlib`](http://passlib.readthedocs.io/en/stable/#) password hashing library to create/update Htpasswd file which can later be used by either NGINX or Apache for enabling basic authentication for desired sites.
 
-The resulting Htpasswd file has [`bcrypt`](http://passlib.readthedocs.io/en/stable/lib/passlib.hash.bcrypt.html) encrypted passwords.
+The resulting Htpasswd file has [`sha256_crypt`](https://passlib.readthedocs.io/en/stable/lib/passlib.hash.sha256_crypt.html) encrypted passwords.
 
 ## **Requirements**
 BasicAuthManager requires Python 2.7.x.
